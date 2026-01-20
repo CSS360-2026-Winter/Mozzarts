@@ -42,6 +42,7 @@ const getWelcomeMessageWithMeme = async (userId) => {
 
   return {
     content: `Welcome ${userMention(userId)},
+    This is a welcome message! 
     Here's a meme for you to enjoy!`,
     embeds: [meme],
   };
