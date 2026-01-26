@@ -13,7 +13,7 @@ const event = {
     /*
       TODO: Change getWelcomeMessage to getWelcomeMessageWithMeme to send a meme to welcome your user.
     */
-    const welcomeMessage = await getWelcomeMessageWithMeme(member.id);
+    const welcomeMessage = await getWelcomeMessage(member.id);
     channel.send(welcomeMessage);
   },
 };
