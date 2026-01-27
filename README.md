@@ -7,11 +7,11 @@ NOTE: Some issues with slash commands on discord app, so a possible fix is the u
 
 
 ## This is the current state of the project
-Memebers need to fork this project and then clone this Repo to start!
+Members need to fork this project and then clone this Repo to start!
 ### Brainstorming:
 We thought of a couple of ideas such as:
 ```
-Gambling bot (Blackjack, Complex slots, Roullette, Poker)
+Gambling bot (Blackjack, Complex slots, Roulette, Poker)
 Trivia bot (Music, Common Knowledge, Movies/Shows)
 Game bot (Wordle, Uno/Card Games, Connect 4)
 ```
@@ -28,6 +28,7 @@ Now We are in the part of finding our requirements and functions!
 Requirements:
 
 1. Trivia of selected genres of music
+
 
 
 
