@@ -1,6 +1,6 @@
 # Mozzarts 
 ```
-Memebers: Will Sarmiento, David Hochberg, Jayden Elishaw, Arteen Ramezani, Khoa Vo
+Members: Will Sarmiento, David Hochberg, Jayden Elishaw, Arteen Ramezani, Khoa Vo
 ```
 NOTE: Some issues with slash commands on discord app, so a possible fix is the use of testing in the web browser for [discord](https://discord.com/)!
 
@@ -28,6 +28,7 @@ Now We are in the part of finding our requirements and functions!
 Requirements:
 
 1. Trivia of selected genres of music
+
 
 
 
