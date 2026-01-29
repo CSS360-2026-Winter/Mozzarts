@@ -1,15 +1,32 @@
-import { EmbedBuilder, SlashCommandBuilder } from "discord.js";
-import rules from "../config/rules.json" assert { type: "json" };
+import {EmbedBuilder, SlashCommandBuilder } from "discord.js";
+// Allows for the path of the rules.json to be used for ease of changing the rules
+import {getRules} from "../helpers/rules.js";
 
-// ... inside execute(interaction) ...
-const embed = new EmbedBuilder()
-    .setColor(0x0099FF)
-    .setTitle("Trivia Game Rules")
-    .setDescription(rules.intro)
-    .addFields(
-        { name: 'Difficulties', value: rules.difficulties.join('\n'), inline: true },
-        { name: 'How to Play', value: rules.gameplay.map(g => `• ${g}`).join('\n') }
-    )
-    .setFooter({ text: 'Good luck, maestro!' });
-//Ephemeral allows for the user that requested the rules to see it
-await interaction.reply({ embeds: [embed], ephemeral: true });
+export default {
+    data: new SlashCommandBuilder()
+        .setName("rules")
+        .setDescription("Music trivia rules!")
+    ,
+    
+    async execute(interaction) {
+        const rules = getRules();
+
+        const embed = new EmbedBuilder()
+        .setColor("#FF0000")
+        .setTitle("Music Trivia Game Rules")
+        .setDescription(rules.intro)
+        .addFields(
+            { name: 'Difficulties:', value: rules.difficulties.map(g =>`- ${g}`).join('\n'), inline: true },
+            { name: 'How to Play', value: rules.gameplay.map(g => `- ${g}`).join('\n') }
+        )
+        .setFooter({ text: 'Good luck, maestro!' });
+
+        //Ephemeral allows for the user that requested the rules to see it
+        await interaction.reply({
+        content: "Here are the rules",
+        embeds: [embed],
+        ephemeral: true,
+        });
+    },
+};
+
