@@ -1,7 +1,7 @@
 import { EmbedBuilder, userMention } from "discord.js";
 
 const CHANNEL_NAME = process.env.CHANNEL_NAME;
-const MEME_URL = process.env.MEME_URL || "";
+const MEME_URL = process.env.MEME_URL ;
 
 const event = {
   name: "guildMemberAdd",
@@ -25,7 +25,7 @@ const getWelcomeMessage = (userId) => {
   */
   return {
     content: `Welcome ${userMention(userId)},
-    Hope you have great time here in the CSS 360 Demo Chatroom!
+    This is Arteen's Personal Test Server so Goodluck!
   `,
   };
 };
@@ -39,11 +39,11 @@ const getWelcomeMessageWithMeme = async (userId) => {
     TODO: Change this function to return different welcome message with a meme everytime a new user joins.
   */
   const meme = await getWelcomeMeme();
-
+  // TODO: MOZZARTS, if you need to change the message you can! 
+  // This is what I put and you all can and should change it to have fun with it!
   return {
     content: `Welcome ${userMention(userId)},
-    This is a welcome message! 
-    Here's a meme for you to enjoy!`,
+    This is Will's deployment server. The alpha watches over you all.`,
     embeds: [meme],
   };
 };

@@ -1,0 +1,10 @@
+{
+  "title": "**Playing the trivia game and the rules:**",
+  "intro": "Firstly we hope you enjoy the trivia! The game provides a variety of genres to test your music knowledge.",
+  "difficulties": ["Easy", "Medium", "Hard"],
+  "gameplay": [
+    "You will listen to a 5 second clip of a song",
+    "You have 4 multiple choice options to choose from",
+    "You are awarded points for guessing right"
+  ]
+}
