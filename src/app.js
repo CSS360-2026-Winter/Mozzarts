@@ -9,11 +9,11 @@ const TOKEN = process.env.TOKEN;
 
 const { Guilds, GuildMembers, GuildMessages, MessageContent } =
   GatewayIntentBits;
-const { User, Message, GuildMember, ThreadMember } = Partials;
+const { User, Message, GuildMember, ThreadMember, Channel } = Partials;
 
 const client = new Client({
   intents: [Guilds, GuildMembers, GuildMessages, MessageContent],
-  partials: [User, Message, GuildMember, ThreadMember],
+  partials: [User, Message, GuildMember, ThreadMember, Channel],
 });
 
 client.events = new Collection();
