@@ -51,3 +51,18 @@ Requirements:
 - A way to choose difficulty
 - [To be continued, need to add last feature  for 1.0 release]
 ```
+> # Version 1.0
+### Arteen Ramezani - Release Notes:
+
+```
+- Added the bot trivia command:
+  - When called the bot shows a preview which will contain a description and
+    difficulties to pick from. Underneath the preview there are interactable
+    buttons with difficulties the user can choose from which for now just displays
+    music questions with multiple choice answers also as buttons. If the answer
+    is correct, based on respective difficulty, the bot will "give" 1, 2, or 3 points
+    to the user (tracking the points is a work in progress). If wrong, gives no points.
+    Additionally after the user picks an answer, there is a display for Correct or
+    Wrong which also shows the Question, Correct Answer, User's Answer, and
+    the name of the question was answered by.
+```
