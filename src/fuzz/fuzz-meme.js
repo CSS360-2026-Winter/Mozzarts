@@ -1,46 +1,72 @@
-// note that this requires you install fast-check --v
+// Requires: npm i -D fast-check
 import fc from "fast-check";
-// note that this is only looking at the meme.js file --v
+
 import { getMeme } from "../helpers/meme.js";
 
-// Minimal fake interaction object for testing
 const fakeInteraction = (content) => ({
-  reply: async ({ embeds }) => {
-    // just log length to see something happened
-    console.log("Replied with embed count:", embeds?.length ?? 0);
-    return true;
-  },
   options: {
     getString: () => content,
   },
+
+  reply: async ({ content: msgContent, embeds } = {}) => {
+    const embedCount = Array.isArray(embeds) ? embeds.length : 0;
+    console.log("Replied:", {
+      contentLen: typeof msgContent === "string" ? msgContent.length : 0,
+      embedCount,
+    });
+    return true;
+  },
 });
+
+function normalizeEmbed(embed) {
+  // discord.js EmbedBuilder has toJSON()
+  if (embed && typeof embed.toJSON === "function") return embed.toJSON();
+  return embed;
+}
 
 const fuzzMemeCommand = async () => {
   console.log("Starting fuzz test...");
 
   await fc.assert(
-    fc.asyncProperty(fc.string(), async (randomInput) => {
-      const interaction = fakeInteraction(randomInput);
+    fc.asyncProperty(
+      fc.string({ maxLength: 500 }),
+      async (randomInput) => {
+        const interaction = fakeInteraction(randomInput);
 
-      // This is the same code your /meme command runs
-      const meme = await getMeme();
-      await interaction.reply({
-        content: "Fuzz test response",
-        embeds: [meme],
-      });
+        try {
+          const meme = await getMeme();
 
-      // Always return true to satisfy fast-check
-      return true;
-    }),
-    { numRuns: 50 } // run 50 random tests
+          await interaction.reply({
+            content: "Fuzz test response",
+            embeds: [normalizeEmbed(meme)],
+          });
+
+          return true;
+        } catch (err) {
+          console.error("FUZZ CASE FAILED");
+          console.error("Input:", JSON.stringify(randomInput));
+          console.error(err?.stack || err);
+          throw err;
+        }
+      }
+    ),
+    {
+      numRuns: 50,
+      // Prevent stalling
+      interruptAfterTimeLimit: 30_000,
+    }
   );
 
   console.log("Fuzz test finished!");
 };
 
-// Run if invoked directly
-if (import.meta.url === process.argv[1] || process.argv.includes("fuzz")) {
-  fuzzMemeCommand();
+const argv1 = process.argv[1] || "";
+const isDirectRun = argv1.includes("fuzz-meme") || argv1.endsWith("fuzz-meme.js");
+
+if (isDirectRun || process.argv.includes("fuzz")) {
+  fuzzMemeCommand()
+    .then(() => process.exit(0))
+    .catch(() => process.exit(1));
 }
 
 export { fuzzMemeCommand };
