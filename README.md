@@ -66,6 +66,7 @@ Requirements:
     Wrong which also shows the Question, Correct Answer, User's Answer, and
     the name of the question was answered by.
 ```
+> # Version 1.02
 ---
 ### Jayden Elishaw - Release Notes:
 
@@ -95,4 +96,5 @@ npm i -D @discordjs/rest discord-api-types
   1) build
   2) `node -r dotenv/config build/app.js`
 ---
+
 
