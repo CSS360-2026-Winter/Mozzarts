@@ -1,9 +1,10 @@
-import {EmbedBuilder, SlashCommandBuilder } from "discord.js";
+import { SlashCommandBuilder } from "discord.js";
+import { setGenre } from "../gameState.js";
 
-module.exports = {
+export default {
   data: new SlashCommandBuilder()
     .setName("genre")
-    .setDescription("Pick a genre of music")
+    .setDescription("Pick a genre for the next trivia session.")
     .addStringOption(option =>
       option
         .setName("type")
@@ -15,13 +16,15 @@ module.exports = {
           { name: "Rock", value: "rock" },
           { name: "Country", value: "country" },
           { name: "Classical", value: "classical" },
-          { name: "Random", value: "random"}
+          { name: "Random", value: "random" }
         )
     ),
 
   async execute(interaction) {
     const genre = interaction.options.getString("type");
+    if (!interaction.guild) return interaction.reply({ content: "Guild only.", ephemeral: true });
 
-    await interaction.reply(`You picked **${genre}** music!`);
+    setGenre(interaction.guild.id, genre);
+    await interaction.reply({ content: `✅ Trivia genre set to **${genre}** for this server.`, ephemeral: true });
   },
 };

@@ -220,8 +220,6 @@ async function playFileInVoice(guild, vc, filePath) {
   guildId: guild.id,
   adapterCreator: vc.guild.voiceAdapterCreator,
   selfDeaf: false,
-  daveEncryption: true,
-  debug: true,
 });
 
 

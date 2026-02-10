@@ -1,0 +1,34 @@
+
+/**
+ * The general need and function of this event will be to run the trivia game instance.
+ * During the running it should only explain the rules once. This will be the explanation event which 
+ * should explain the rules of the game.
+ * 
+ * General content of the message:
+ * // Maybe an animation
+ * Music Trivia Rules:
+ * Time limit:
+ * Times you can replay the song clip
+ * 
+ * 
+ */
+
+
+// Empty file must have  this block of code to run, since all files in src export a default
+// const event = {
+
+// }
+
+
+// export default event;
+
+
+
+
+
+
+
+
+
+
+
