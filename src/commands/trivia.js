@@ -400,6 +400,16 @@ export default {
             break;
           }
         }
+        // clear old song preview stoppers from previous round so it doesn't cut off new song preview
+        const prevSession = getSession(guild.id);
+        if (prevSession?.previewStopper) {
+          clearTimeout(prevSession.previewStopper);
+          prevSession.previewStopper = null;
+          setSession(guild.id, prevSession);
+        }
+
+
+
         // Round state
         // always pull a fresh random track; previous connection logic
         // (err.g. from /game) has been removed and is no longer relevant.
@@ -603,6 +613,12 @@ export default {
 
             await roundMsg.edit({ components: [newAnswerRow, controlRow] }).catch(() => {});
             await i.reply({ content: "❌ Wrong answer!", ephemeral: true });
+            
+            // round ends immediately if freeze is active and answer was wrong
+            if (freezeActive) {
+              try { clearInterval(timerInterval); } catch {}
+              componentCollector.stop("freeze_wrong");
+            }
             return;
           }
 
