@@ -228,7 +228,7 @@ export default {
       .setColor(0x1db954)
       .setTitle("🎵 Music Trivia")
       .setDescription(
-        `Select a difficulty to begin (10 questions). You’ll hear a 30s preview and then have 15 seconds to answer each multiple-choice question. A replay button allows one additional listen per song. A hint button provides a single clue per round.`
+        `Select a difficulty to begin (10 questions). You’ll hear a 30s preview and then have 15 seconds to answer each multiple-choice question. A replay button allows one additional listen per song. A hint button provides a single clue per round. No hints for Hard difficulty.`
       )
       .addFields(
         { name: "Easy", value: "1 point • artist or genre questions", inline: true },
@@ -343,7 +343,7 @@ export default {
         `✅ You’ll hear **30s** of a song preview.\n` +
         `💬 After the preview ends you’ll have **15 seconds** to answer using the multiple-choice buttons in <#${tc.id}>.\n` +
         `🔁 A replay button lets you hear the song one more time; using it restarts the timer (only once per round).\n` +
-        `💡 A hint button provides one clue per round.\n`
+        `💡 A hint button provides one clue per round. **No hints for Hard difficulty**.\n`
     );
     // flowchart: User in Game channel? (loop)
     // Check if the user in the Game vc channel before starting the game. We give 
@@ -572,7 +572,7 @@ export default {
             const idx = parseInt(i.customId.replace("trivia_answer_", ""), 10);
             const selected = question.options[idx];
             if (selected === question.correctAnswer) { // if their answer was correct
-              winner = { correct: true, userId: i.user.id };
+              winner = { correct: true, userId: i.user.id, selected };
               try { clearInterval(timerInterval); } catch {}
 
               const newAnswerRow = ActionRowBuilder.from(answerRow).setComponents(
@@ -754,7 +754,7 @@ export default {
               await roundMsg.edit({ components: [highlighted, disabledCtrl] }).catch(() => {});
             } catch {}
 
-            const answerLine = `✅ **${track.trackName}** — **${track.artistName}**`;
+            const answerLine = `✅ **Correct answer:** ${question.correctAnswer}`;
 
             if (winner.correct && winner.userId) {
               let pts = pointsFor(difficulty);
@@ -769,7 +769,7 @@ export default {
               const top = getGuildScoresSorted(guild.id).slice(0, 5);
               const topLines = top.map(([uid, p], idx) => `${idx + 1}. <@${uid}> — **${p}**`).join("\n");
 
-              const resultEmbed = createResultEmbed(question, question.correctAnswer, {
+              const resultEmbed = createResultEmbed(question, winner.selected, {
                 username: `<@${winner.userId}>`,
               });
 
