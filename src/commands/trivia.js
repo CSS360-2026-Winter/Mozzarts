@@ -252,9 +252,9 @@ export default {
         **Now select a difficulty to start the game!**`
       )
       .addFields(
-        { name: "Easy", value: "1 point • **artist** or **genre** questions", inline: true },
-        { name: "Medium", value: "2 points • **album** or **track-title** questions", inline: true },
-        { name: "Hard", value: "3 points • **release-year** questions", inline: true }
+        { name: "Easy", value: "**1 point** • **artist** or **genre** questions", inline: true },
+        { name: "Medium", value: "**2 points** • **album** or **track-title** questions", inline: true },
+        { name: "Hard", value: "**3 points** • **release-year** questions", inline: true }
       );
     const row = new ActionRowBuilder().addComponents(
       new ButtonBuilder().setCustomId("trivia_difficulty_easy").setLabel("Easy").setStyle(ButtonStyle.Success),
@@ -365,7 +365,10 @@ export default {
         `✅ You’ll hear **30s** of a song preview and have time to guess the correct answer after.\n` +
         `💬 When the preview ends you’ll have **15 seconds** to answer the question using the **multiple-choice** buttons in <#${tc.id}>.\n` +
         `🔁 A **replay** button lets you hear the song one more time; using it restarts the timer (only once per round).\n` +
-        `💡 A hint button provides one clue per round. **No hints for Hard difficulty**.\n` 
+        `💡 A hint button provides one clue per round with a penalty applied in the difficulty **Medium** of -1 point. **No hints for Hard difficulty**.\n` +
+        `⚠️ Wrong answers will be marked with a red ❌ and correct answers with a green ✅.\n` +
+        `🏆 At the end of 5 rounds, the player with the most points wins! In case of a tie, the player who answered faster wins.\n` +
+        `📊 Your score and stats will be tracked across games, so keep playing to climb the leaderboard and show off your music knowledge!` 
 
     );
     // flowchart: User in Game channel? (loop)
