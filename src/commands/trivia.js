@@ -434,6 +434,14 @@ export default {
             { name: "Genre", value: String(genre).toUpperCase(), inline: true }
           );
 
+          // changes time allowed for each round depending on difficulty 
+          const difficultyTimer = {
+            easy: { base: 15, replayAdd: 15 },
+            medium: { base: 15, replayAdd: 10 },
+            hard: { base: 15, replayAdd: 5 },
+          };
+
+const { base, replayAdd } = difficultyTimer[difficulty];
           // We keep a reference to this message so that we can delete it after the preview is over to keep the channel clean.
           const listenMsg = await tc.send({ embeds: [listenEmbed] });
         // flowchart: User listens to song for 30 seconds -> question + answers are shown in tc
@@ -524,12 +532,12 @@ export default {
           setSession(guild.id, ssCollector);
         }
 
-        let timeLeft = 15;
+        let timeLeft = base;
         let timerInterval = null;
 
         function startTimer() {
           clearInterval(timerInterval);
-          timeLeft = 15;
+          timeLeft = base;
           // This is the countdown for the timer
           timerInterval = setInterval(async () => {
             if (timeLeft <= 0) return;
@@ -680,10 +688,20 @@ export default {
                 } catch {}
               } catch {}
             })();
-
             if (!freezeActive) {
-              startTimer();
-              componentCollector.resetTimer({ time: 15000 });
+              timeLeft = Math.min(timeLeft + replayAdd, 15);
+              componentCollector.resetTimer({ time: base * 1000 });
+
+              try {
+                const updatedEmbed = EmbedBuilder.from(questionEmbed).setFooter({
+                  text: `⏳ Time left: ${timeLeft}s`,
+                });
+
+                await roundMsg.edit({
+                  embeds: [updatedEmbed],
+                  components: [answerRow, controlRow],
+                });
+              } catch {}
             }
             return;
           }
