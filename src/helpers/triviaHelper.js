@@ -30,9 +30,10 @@ export function createTriviaQuestion(question) {
   // customId rather than the full text to avoid length limits and encoding
   // problems; the handler will look up the answer in the question object.
   const buttons = question.options.map((option, idx) => {
+    const label = option.length > 80 ? option.slice(0, 77) + "..." : option; // truncate if too long
     return new ButtonBuilder()
       .setCustomId(`trivia_answer_${idx}`)
-      .setLabel(option)
+      .setLabel(label)
       .setStyle(ButtonStyle.Primary);
   });
 

@@ -228,7 +228,7 @@ export default {
       .setColor(0x1db954)
       .setTitle("🎵 Music Trivia")
       .setDescription(
-        `Select a difficulty to begin (10 questions). You’ll hear a 30s preview and then have 15 seconds to answer each multiple-choice question. A replay button allows one additional listen per song. A hint button provides a single clue per round. No hints for Hard difficulty.`
+        `Select a difficulty to begin (5 questions). You’ll hear a 30s preview and then have 15 seconds to answer each multiple-choice question. A replay button allows one additional listen per song. A hint button provides a single clue per round. No hints for Hard difficulty.`
       )
       .addFields(
         { name: "Easy", value: "1 point • artist or genre questions", inline: true },
@@ -315,7 +315,7 @@ export default {
       guildId: guild.id,
       hostId: interaction.user.id,
       difficulty,
-      totalRounds: 10,
+      totalRounds: 5,
       round: 0,
       currentTrack: null,
       textChannelId: tc.id,
@@ -383,7 +383,7 @@ export default {
       // manage the state for each round.
       // TODO: Add a way to break out of the loop early if there are no players 
       // or if the admin wants to end the game early.(Maybe even user who invoked it too?)
-      for (let round = 1; round <= 10; round++) {
+      for (let round = 1; round <= 5; round++) {
         const s = getSession(guild.id);
         // check for an administrator-initiated termination 
         if (s?.terminated) break;
@@ -427,7 +427,7 @@ export default {
         // and also to allow the user to know how long the preview plays for.
         const listenEmbed = new EmbedBuilder()
           .setColor(0x2b2d31)
-          .setTitle(`🎧 Round ${round}/10`)
+          .setTitle(`🎧 Round ${round}/5`)
           .setDescription(`Listening for **30 seconds**...`)
           .addFields(
             { name: "Difficulty", value: difficulty.toUpperCase(), inline: true },
@@ -848,8 +848,8 @@ const { base, replayAdd } = difficultyTimer[difficulty];
       } else {
         const highestScorer = final[0];
         addGameWon(guild.id, highestScorer[0]); // increase their games won stat
-        const lines = final.slice(0, 10).map(([uid, pts], i) => `${i + 1}. <@${uid}> — **${pts}**`);
-        await tc.send(`🏁 **Game over! Final scoreboard:**\n${lines.join("\n")}`);
+        //const lines = final.slice(0, 10).map(([uid, pts], i) => `${i + 1}. <@${uid}> — **${pts}**`);
+        //await tc.send(`🏁 **Game over! Final scoreboard:**\n${lines.join("\n")}`);
       }
 
       // ===== END OF GAME (SKIP IF TERMINATED) =====
