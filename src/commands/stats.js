@@ -1,6 +1,6 @@
 // Gets the stats for the person who runs the command
 import { SlashCommandBuilder } from "discord.js";
-import { getRoundsPlayed, getRoundsWon, getGamesPlayed, getGamesWon } from "../helpers/statsStore.js";
+import { getRoundsPlayed, getRoundsWon, getGamesPlayed, getGamesWon, getHintsUsed, getPowerupsUsed } from "../helpers/statsStore.js";
 
 export default {
     data: new SlashCommandBuilder()
@@ -24,9 +24,11 @@ export default {
         const roundsWon = getRoundsWon(guildId, userId);
         const gamesPlayed = getGamesPlayed(guildId, userId);
         const gamesWon = getGamesWon(guildId, userId);
+        const hintsUsed = getHintsUsed(guildId, userId);
+        const powerupsUsed = getPowerupsUsed(guildId, userId);
 
         await interaction.reply({
-          content: `Your stats:\nRounds played: ${roundsPlayed}\nRounds won: ${roundsWon}\nGames played: ${gamesPlayed}\nGames won: ${gamesWon}`,
+          content: `Your stats:\nRounds played: ${roundsPlayed}\nRounds won: ${roundsWon}\nGames played: ${gamesPlayed}\nGames won: ${gamesWon}\nHints used: ${hintsUsed}\nPowerups used: ${powerupsUsed}`,
           ephemeral: true,
         });
       },

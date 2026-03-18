@@ -22,7 +22,7 @@ import fs from "node:fs";
 
 import { getGenre, getSession, setSession, clearSession } from "../gameState.js";
 import { resetScores, addPoints, getGuildScoresSorted } from "../helpers/scoreStore.js";
-import { addRoundPlayed, addRoundWon, addGamePlayed, addGameWon } from "../helpers/statsStore.js";
+import { addRoundPlayed, addRoundWon, addGamePlayed, addGameWon, addHintUsed } from "../helpers/statsStore.js";
 import { makeHint } from "../helpers/hintHelper.js";
 import { makeSongQuestion, createTriviaQuestion, createResultEmbed } from "../helpers/triviaHelper.js";
 import { getRandomItunesTrack, downloadPreview } from "../helpers/itunes.js";
@@ -789,6 +789,8 @@ export default {
               return;
             }
             hintUsed = true;
+            addHintUsed(guild.id, i.user.id);
+
 
             try {
               const disabledCtrl = ActionRowBuilder.from(controlRow).setComponents(

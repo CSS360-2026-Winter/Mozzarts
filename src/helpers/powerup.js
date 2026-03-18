@@ -1,4 +1,5 @@
 //import { SlashCommandBuilder } from "discord.js";
+import { addPowerupUsed } from "../helpers/statsStore.js";
 
 const powerups = new Map();
 
@@ -29,6 +30,7 @@ export function consumeFreeze(guildId, userId) {
 
   if (guildStore[userId]?.freeze) {
     delete guildStore[userId].freeze;
+    addPowerupUsed(guildId, userId);
     return true;
   }
 
@@ -39,6 +41,7 @@ export function consumeDoublePoints(guildId, userId) {
   const guildStore = powerups.get(guildId);
   if (guildStore?.[userId]?.doublePoints) {
     guildStore[userId].doublePoints = false; // Use it up
+    addPowerupUsed(guildId, userId);
     return true;
   }
   return false;

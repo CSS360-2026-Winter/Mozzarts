@@ -1,6 +1,6 @@
 // Admin command to get the score of any player
 import { PermissionsBitField, SlashCommandBuilder } from "discord.js";
-import { getRoundsPlayed, getRoundsWon, getGamesPlayed, getGamesWon } from "../helpers/statsStore.js";
+import { getRoundsPlayed, getRoundsWon, getGamesPlayed, getGamesWon, getHintsUsed, getPowerupsUsed } from "../helpers/statsStore.js";
 
 export default {
   data: new SlashCommandBuilder()
@@ -37,10 +37,12 @@ export default {
     const roundsPlayed = getRoundsPlayed(guildId, userId);
     const roundsWon = getRoundsWon(guildId, userId);
     const gamesPlayed = getGamesPlayed(guildId, userId);
-    const gamesWon = getGamesWon(guildId, userId);;
+    const gamesWon = getGamesWon(guildId, userId);
+    const hintsUsed = getHintsUsed(guildId, userId);
+    const powerupsUsed = getPowerupsUsed(guildId, userId);
 
     await interaction.reply({
-      content: `${username}'s stats:\nRounds played: ${roundsPlayed}\nRounds won: ${roundsWon}\nGames played: ${gamesPlayed}\nGames won: ${gamesWon}`,
+      content: `${username}'s stats:\nRounds played: ${roundsPlayed}\nRounds won: ${roundsWon}\nGames played: ${gamesPlayed}\nGames won: ${gamesWon}\nHints used: ${hintsUsed}\nPowerups used: ${powerupsUsed}`,
       ephemeral: true,
     });
   },
