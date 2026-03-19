@@ -185,4 +185,16 @@ Kieran Moynihan Changes:
  - Skip preview of the song (#114 by @khoav22)
  - Less time to listen to replay based on difficulty (#109 by @khoav22)
 
+## Arteen Ramezani
+ Changes in this version code architecture by @rt-op in https://github.com/CSS360-2026-Winter/Mozzarts/issues/54:
+    - Broke down the 600+ line execute function into 18 smaller, focused functions
+    - Added comprehensive JSDoc documentation for all functions with parameter types and descriptions
+    - Improved code readability with detailed inline comments explaining game flow phases
+    - Enhanced error handling and resource cleanup
+    - Preserved all existing bot functionality and user experience
+    - Fixed test suite issues and import/export mismatches
+    - Created missing powerup command that was referenced in tests
+    - Modularized game phases: difficulty selection, channel validation, voice setup, game loop, scoring, cleanup
+    - Better separation of concerns between UI, game logic, and data management
+
 
