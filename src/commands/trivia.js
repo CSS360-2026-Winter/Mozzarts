@@ -524,8 +524,7 @@ async function handleQuestionPhase(textChannel, question, track, difficulty, gui
   }
 
   // Round state tracking
-  let replayUsed = false;
-  let hintUsed = false;
+  let roundState = { replayUsed: false, hintUsed: false };
   let winner = { correct: false, userId: null };
   const answeredUsers = new Set();
 
@@ -611,13 +610,13 @@ async function handleQuestionPhase(textChannel, question, track, difficulty, gui
 
     // Handle replay button
     if (i.customId === "trivia_replay") {
-      await handleReplayRequest(i, replayUsed, player, roundMsg, answerRow, controlRow, questionEmbed, timeLeft, componentCollector, freezeActive, guildId);
+      await handleReplayRequest(i, roundState, player, roundMsg, answerRow, controlRow, questionEmbed, timeLeft, componentCollector, freezeActive, guildId);
       return;
     }
 
     // Handle hint button
     if (i.customId === "trivia_hint") {
-      await handleHintRequest(i, hintUsed, difficulty, track, question, roundMsg, answerRow, controlRow, textChannel, guildId);
+      await handleHintRequest(i, roundState, difficulty, track, question, roundMsg, answerRow, controlRow, textChannel, guildId);
       return;
     }
   });
@@ -625,7 +624,7 @@ async function handleQuestionPhase(textChannel, question, track, difficulty, gui
   // Return promise that resolves when round ends
   return new Promise((resolve) => {
     componentCollector.on("end", async (collected, reason) => {
-      await finalizeRound(reason, question, winner, answerRow, controlRow, roundMsg, timerInterval, textChannel, doublePtsActive, hintUsed, difficulty, guildId, tmpFile, listenMsg, resolve);
+      await finalizeRound(reason, question, winner, answerRow, controlRow, roundMsg, timerInterval, textChannel, doublePtsActive, roundState, difficulty, guildId, tmpFile, listenMsg, resolve);
     });
   });
 }
@@ -702,7 +701,7 @@ async function handleAnswerSelection(i, answeredUsers, question, winner, answerR
 /**
  * Handles replay button functionality
  * @param {Interaction} i - The button interaction
- * @param {boolean} replayUsed - Whether replay has already been used
+ * @param {Object} roundState - Round state object containing replayUsed and hintUsed
  * @param {AudioPlayer} player - The audio player
  * @param {Message} roundMsg - The round message
  * @param {ActionRowBuilder} answerRow - The answer buttons row
@@ -713,8 +712,8 @@ async function handleAnswerSelection(i, answeredUsers, question, winner, answerR
  * @param {boolean} freezeActive - Whether freeze power-up is active
  * @param {string} guildId - The guild ID
  */
-async function handleReplayRequest(i, replayUsed, player, roundMsg, answerRow, controlRow, questionEmbed, timeLeft, componentCollector, freezeActive, guildId) {
-  if (replayUsed) {
+async function handleReplayRequest(i, roundState, player, roundMsg, answerRow, controlRow, questionEmbed, timeLeft, componentCollector, freezeActive, guildId) {
+  if (roundState.replayUsed) {
     await i.reply({ content: "Replay already used for this song.", ephemeral: true });
     return;
   }
@@ -725,7 +724,7 @@ async function handleReplayRequest(i, replayUsed, player, roundMsg, answerRow, c
     return;
   }
 
-  replayUsed = true;
+  roundState.replayUsed = true;
 
   // Disable replay button
   try {
@@ -795,7 +794,7 @@ async function handleReplayRequest(i, replayUsed, player, roundMsg, answerRow, c
 /**
  * Handles hint button functionality
  * @param {Interaction} i - The button interaction
- * @param {boolean} hintUsed - Whether hint has already been used
+ * @param {Object} roundState - Round state object containing replayUsed and hintUsed
  * @param {string} difficulty - The game difficulty
  * @param {Object} track - The track information
  * @param {Object} question - The trivia question
@@ -805,18 +804,18 @@ async function handleReplayRequest(i, replayUsed, player, roundMsg, answerRow, c
  * @param {TextChannel} textChannel - The text channel
  * @param {string} guildId - The guild ID
  */
-async function handleHintRequest(i, hintUsed, difficulty, track, question, roundMsg, answerRow, controlRow, textChannel, guildId) {
+async function handleHintRequest(i, roundState, difficulty, track, question, roundMsg, answerRow, controlRow, textChannel, guildId) {
   if (difficulty === "hard") {
     await i.reply({ content: "Hints are not allowed for hard difficulty.", ephemeral: true });
     return;
   }
 
-  if (hintUsed) {
+  if (roundState.hintUsed) {
     await i.reply({ content: "Hint already used this round.", ephemeral: true });
     return;
   }
 
-  hintUsed = true;
+  roundState.hintUsed = true;
   addHintUsed(guildId, i.user.id);
 
   // Disable hint button
@@ -852,14 +851,14 @@ async function handleHintRequest(i, hintUsed, difficulty, track, question, round
  * @param {number} timerInterval - The timer interval ID
  * @param {TextChannel} textChannel - The text channel
  * @param {boolean} doublePtsActive - Whether double points power-up is active
- * @param {boolean} hintUsed - Whether hint was used this round
+ * @param {Object} roundState - Round state object containing replayUsed and hintUsed
  * @param {string} difficulty - The game difficulty
  * @param {string} guildId - The guild ID
  * @param {string} tmpFile - Path to temporary audio file
  * @param {Message} listenMsg - The listening message to delete
  * @param {Function} resolve - Promise resolve function
  */
-async function finalizeRound(reason, question, winner, answerRow, controlRow, roundMsg, timerInterval, textChannel, doublePtsActive, hintUsed, difficulty, guildId, tmpFile, listenMsg, resolve) {
+async function finalizeRound(reason, question, winner, answerRow, controlRow, roundMsg, timerInterval, textChannel, doublePtsActive, roundState, difficulty, guildId, tmpFile, listenMsg, resolve) {
   const endSession = getSession(guildId);
 
   if (reason === "terminated" || !endSession?.active || endSession?.terminated) {
@@ -915,12 +914,11 @@ async function finalizeRound(reason, question, winner, answerRow, controlRow, ro
 
   if (winner.correct && winner.userId) {
     // Calculate points
-    let pts = calculatePoints(difficulty, false);
+    let pts = calculatePoints(difficulty, roundState.hintUsed);
     if (doublePtsActive) {
       pts *= 2;
-      question.points = pts;
     }
-    pts = hintUsed && difficulty === "medium" ? pts - 1 : pts;
+    question.points = pts;
 
     // Send winner message
     const session = getSession(guildId);

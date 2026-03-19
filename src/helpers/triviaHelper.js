@@ -143,7 +143,27 @@ export async function makeSongQuestion(track, difficulty = "easy", otherTrackPro
       const other = await otherTrackProvider(genre);
       const val = choice.getter(other);
       if (val && val !== "" && val !== correct) {
-        wrongs.add(val);
+        // Ensure wrong answers are relevant to the question type
+        let isRelevant = true;
+        if (choice.id === "title") {
+          // For song title questions, wrong answers should not be genres, artists, albums, or years
+          isRelevant = val !== track.primaryGenreName && val !== track.artistName && val !== track.collectionName && !/^\d{4}$/.test(val);
+        } else if (choice.id === "artist") {
+          // For artist questions, wrong answers should not be genres, song titles, albums, or years
+          isRelevant = val !== track.primaryGenreName && val !== track.trackName && val !== track.collectionName && !/^\d{4}$/.test(val);
+        } else if (choice.id === "album") {
+          // For album questions, wrong answers should not be genres, artists, song titles, or years
+          isRelevant = val !== track.primaryGenreName && val !== track.artistName && val !== track.trackName && !/^\d{4}$/.test(val);
+        } else if (choice.id === "genre") {
+          // For genre questions, wrong answers should not be artists, song titles, albums, or years
+          isRelevant = val !== track.artistName && val !== track.trackName && val !== track.collectionName && !/^\d{4}$/.test(val);
+        } else if (choice.id === "year") {
+          // For year questions, wrong answers should be 4-digit years
+          isRelevant = /^\d{4}$/.test(val);
+        }
+        if (isRelevant) {
+          wrongs.add(val);
+        }
       }
     } catch {
       // ignore failed calls
