@@ -5,11 +5,9 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 
-// helper utilities that are shared by both the /game and /trivia commands
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
 
-// terms used when searching iTunes by genre name
 export const GENRE_TERMS = {
   pop: ["pop", "top hits", "dance pop", "summer hits", "viral pop"],
   hiphop: ["hip hop", "rap", "trap", "drill", "r&b hip hop"],
@@ -62,7 +60,6 @@ function requestBuffer(urlStr, { timeoutMs = 30000, maxBytes = 12_000_000, redir
       (res) => {
         const status = res.statusCode ?? 0;
 
-        // follow redirects
         if ([301, 302, 303, 307, 308].includes(status) && res.headers.location && redirects > 0) {
           const next = new URL(res.headers.location, url).toString();
           res.resume();
@@ -110,42 +107,55 @@ async function requestJson(urlStr) {
   return JSON.parse(buf.toString("utf8"));
 }
 
-/**
- * Ask iTunes for a random track preview and metadata.
- * @param {string|null} genre - optional genre key, e.g. 'pop' or 'rock'.
- *                             if not provided a random genre term is used.
- * @returns {Promise<object>} track object containing previewUrl, trackName,
- * artistName, primaryGenreName, releaseDate, collectionName
- */
+function getGenreTerms(genre) {
+  return GENRE_TERMS[genre] ?? GENRE_TERMS.random;
+}
+
+function buildItunesSearchUrl(term) {
+  const url = new URL("https://itunes.apple.com/search");
+  url.searchParams.set("term", term);
+  url.searchParams.set("media", "music");
+  url.searchParams.set("entity", "song");
+  url.searchParams.set("limit", "50");
+  url.searchParams.set("country", "US");
+  return url.toString();
+}
+
+function getPreviewCandidates(results) {
+  return results.filter(
+    (result) => typeof result?.previewUrl === "string" && result.previewUrl.startsWith("http")
+  );
+}
+
+function sanitizeTrack(track) {
+  return {
+    previewUrl: track.previewUrl,
+    trackName: track.trackName ?? "Unknown track",
+    artistName: track.artistName ?? "Unknown artist",
+    primaryGenreName: track.primaryGenreName ?? "Unknown genre",
+    releaseDate: track.releaseDate ?? null,
+    collectionName: track.collectionName ?? null,
+  };
+}
+
+async function fetchTrackForTerm(term) {
+  const data = await requestJson(buildItunesSearchUrl(term));
+  const results = Array.isArray(data?.results) ? data.results : [];
+  const candidates = getPreviewCandidates(results);
+
+  if (!candidates.length) {
+    throw new Error("No previewUrl results.");
+  }
+
+  return sanitizeTrack(pick(candidates));
+}
+
 export async function getRandomItunesTrack(genre) {
-  const terms = GENRE_TERMS[genre] ?? GENRE_TERMS.random;
+  const terms = getGenreTerms(genre);
 
   for (let attempt = 1; attempt <= 6; attempt++) {
-    const term = pick(terms);
-    const url = new URL("https://itunes.apple.com/search");
-    url.searchParams.set("term", term);
-    url.searchParams.set("media", "music");
-    url.searchParams.set("entity", "song");
-    url.searchParams.set("limit", "50");
-    url.searchParams.set("country", "US");
-
     try {
-      const data = await requestJson(url.toString());
-      const results = Array.isArray(data?.results) ? data.results : [];
-      const candidates = results.filter(
-        (r) => typeof r?.previewUrl === "string" && r.previewUrl.startsWith("http")
-      );
-      if (!candidates.length) throw new Error("No previewUrl results.");
-      const track = pick(candidates);
-
-      return {
-        previewUrl: track.previewUrl,
-        trackName: track.trackName ?? "Unknown track",
-        artistName: track.artistName ?? "Unknown artist",
-        primaryGenreName: track.primaryGenreName ?? "Unknown genre",
-        releaseDate: track.releaseDate ?? null,
-        collectionName: track.collectionName ?? null,
-      };
+      return await fetchTrackForTerm(pick(terms));
     } catch {
       await sleep(350);
     }
@@ -154,11 +164,6 @@ export async function getRandomItunesTrack(genre) {
   throw new Error("Failed to get iTunes track after retries.");
 }
 
-/**
- * Download a preview URL to a temporary file path and return the path.
- * @param {string} previewUrl
- * @returns {Promise<string>} path to the temporary file that was written.
- */
 export async function downloadPreview(previewUrl) {
   const buf = await requestBuffer(previewUrl, { timeoutMs: 35000, maxBytes: 12_000_000 });
   if (buf.length < 25_000) throw new Error(`Preview too small (${buf.length} bytes)`);
@@ -172,3 +177,10 @@ export async function downloadPreview(previewUrl) {
   await fs.promises.writeFile(tmpPath, buf);
   return tmpPath;
 }
+
+export const _test = {
+  getGenreTerms,
+  buildItunesSearchUrl,
+  getPreviewCandidates,
+  sanitizeTrack,
+};

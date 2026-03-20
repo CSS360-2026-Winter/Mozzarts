@@ -1,12 +1,11 @@
 import {
   SlashCommandBuilder,
   PermissionsBitField,
-  ActionRowBuilder,
-  ButtonBuilder,
   MessageFlags,
 } from "discord.js";
 
-import { getSession, skipCurrentRound, setSession } from "../gameState.js";
+import { getSession, skipCurrentRound } from "../gameState.js";
+import { interruptSession } from "../helpers/sessionControl.js";
 
 export default {
   data: new SlashCommandBuilder()
@@ -43,65 +42,17 @@ export default {
     }
 
     skipCurrentRound(guildId);
-    const updatedSession = getSession(guildId);
-
-    try {
-      if (updatedSession?.timerInterval) {
-        clearInterval(updatedSession.timerInterval);
-      }
-    } catch {}
-
-    try {
-      if (updatedSession?.previewStopper) {
-        clearTimeout(updatedSession.previewStopper);
-      }
-    } catch {}
-
-    try {
-      updatedSession?.player?.stop(true);
-    } catch {}
-
-    try {
-      if (updatedSession?.roundCollector && !updatedSession.roundCollector.ended) {
-        updatedSession.roundCollector.stop("skipped");
-      }
-    } catch {}
-
-    try {
-      if (updatedSession?.textChannelId && updatedSession?.roundMessageId) {
-        const ch = await interaction.guild.channels.fetch(updatedSession.textChannelId).catch(() => null);
-        if (ch?.isTextBased?.()) {
-          const msg = await ch.messages.fetch(updatedSession.roundMessageId).catch(() => null);
-          if (msg?.components?.length) {
-            const disabled = msg.components.map((row) => {
-              const rb = ActionRowBuilder.from(row);
-              rb.setComponents(row.components.map((c) => ButtonBuilder.from(c).setDisabled(true)));
-              return rb;
-            });
-            await msg.edit({ components: disabled }).catch(() => {});
-          }
-        }
-      }
-    } catch {}
-
-    try {
-      if (updatedSession) {
-        updatedSession.timerInterval = null;
-        updatedSession.previewStopper = null;
-        updatedSession.roundCollector = null;
-        setSession(guildId, updatedSession);
-      }
-    } catch {}
+    const interruptedSession = await interruptSession(interaction.guild, guildId, "skipped");
 
     await interaction.reply({
       content: "⏭️ Current trivia round skipped.",
       flags: MessageFlags.Ephemeral,
     });
 
-    if (updatedSession?.textChannelId) {
-      const ch = await interaction.guild.channels.fetch(updatedSession.textChannelId).catch(() => null);
-      if (ch?.isTextBased?.()) {
-        await ch.send("⏭️ **Round skipped by administrator.**").catch(() => {});
+    if (interruptedSession?.textChannelId) {
+      const channel = await interaction.guild.channels.fetch(interruptedSession.textChannelId).catch(() => null);
+      if (channel?.isTextBased?.()) {
+        await channel.send("⏭️ **Round skipped by administrator.**").catch(() => {});
       }
     }
   },

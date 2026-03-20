@@ -70,15 +70,14 @@ describe("commands regression", () => {
       const g = "g_getscore_full";
       resetScores(g);
 
-      // 12 users => should only show top 10 lines
-      for (let i = 1; i <= 12; i++) addPoints(g, `u${i}`, i); // u12 highest
+      for (let i = 1; i <= 12; i++) addPoints(g, `u${i}`, i);
 
       const interaction = makeMockInteraction({ guildId: g });
       await leaderboardCmd.execute(interaction);
 
       const msg = interaction.reply.last[0].content;
       expect(msg).to.include("**Scoreboard (Top 10)**");
-      expect(msg).to.include("Total points: **78**"); // sum 1..12 = 78
+      expect(msg).to.include("Total points: **78**");
       expect(msg).to.include("<@u12> — **12**");
       expect(msg).to.include("10. <@u3> — **3**");
       expect(msg).to.not.include("11.");
@@ -105,7 +104,7 @@ describe("commands regression", () => {
   });
 
   describe("/terminate", () => {
-    it("requires admin permission", async () => {
+    it("allows any player to terminate an active session", async () => {
       const g = "g_term_perm";
       setSession(g, { active: true, textChannelId: "c1" });
 
@@ -114,11 +113,16 @@ describe("commands regression", () => {
         hasAdmin: false,
       });
 
+      interaction.guild.channels.fetch = async () => ({
+        isTextBased: () => true,
+        send: async () => undefined,
+      });
+
       await terminateCmd.execute(interaction);
 
       expect(interaction.reply.calls).to.have.lengthOf(1);
-      expect(interaction.reply.last[0].content).to.include("must be a server administrator");
-      expect(interaction.reply.last[0].flags).to.equal(64); // MessageFlags.Ephemeral
+      expect(interaction.reply.last[0].content).to.include("terminated immediately");
+      expect(interaction.reply.last[0].flags).to.equal(64);
 
       clearSession(g);
     });
@@ -133,7 +137,6 @@ describe("commands regression", () => {
         hasAdmin: true,
       });
 
-      // mock channel fetch
       interaction.guild.channels.fetch = async () => ({
         isTextBased: () => true,
         send: async (m) => sent.push(m),
@@ -145,7 +148,7 @@ describe("commands regression", () => {
       expect(interaction.reply.last[0].content).to.include("terminated");
       expect(interaction.reply.last[0].ephemeral).to.equal(true);
 
-      expect(sent).to.deep.equal(["❌ **Game terminated by administrator.**"]);
+      expect(sent).to.deep.equal(["❌ **Game terminated by <@u1>.**"]);
 
       clearSession(g);
     });
